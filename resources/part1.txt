@@ -1,0 +1,92 @@
+Project 1 — Recipe Recommender RAG
+Scenario
+A food startup wants a chatbot that answers user questions from a library of 10,000 recipe PDFs. Users ask things like "What can I make with leftover chicken and lemon?" or "Give me a low-carb dessert under 30 minutes." Your job is to build the ingestion pipeline and a working retrieval loop — then diagnose why it sometimes returns irrelevant recipes.
+
+
+Part A — Ingestion Pipeline
+Task 1 · Chunk the Recipes
+You are given a folder of recipe text files. Each file has the structure below. Design a chunking strategy that treats each section as its own chunk — ingredients, method, and tips should never be merged into one embedding.
+
+# recipe_001.txt
+Title: Lemon Herb Roast Chicken
+Tags: chicken, dinner, low-carb, gluten-free
+Prep: 15 min  |  Cook: 60 min  |  Serves: 4
+
+## Ingredients
+1 whole chicken (1.5 kg)
+2 lemons, zested and juiced
+4 garlic cloves, minced
+...
+
+## Method
+1. Preheat oven to 200°C ...
+...
+
+## Chef Tips
+For extra crispy skin, pat the chicken dry ...
+
+
+Q1  Chunk design
+Describe your chunking strategy in plain English. What is the unit of a chunk — one section, one recipe, one instruction step? Justify the choice given that queries will mix ingredient constraints with dietary filters.
+Hint: Think about what information a single embedding needs to carry for a cosine search to work.
+Q2  Metadata schema
+Define the metadata fields you will attach to each chunk (e.g., recipe_id, section, tags, prep_time_mins). Write a Python dataclass or dict that represents one chunk record.
+Q3  Overlap decision
+The method section of some recipes spans 800 words. Would you add chunk overlap here? How many characters, and why?
+
+Task 2 · Embed and Index
+Choose an embedding model and an index type for a corpus that will grow from 50 K to 500 K chunks over 12 months. Justify both choices with concrete numbers.
+
+Criterion
+Your Choice
+Why
+Embedding model
+
+Embedding dimensions
+
+Index type at 50 K chunks
+
+Index type at 500 K chunks
+
+n_probe or M parameter
+
+Q4  Index migration
+At what corpus size would you migrate from IVFFlat to HNSW? What operational steps would that migration require (re-embed? retrain? downtime?)?
+Q5  HashEmbedder trap
+A colleague suggests using a fast deterministic hash function as the embedding during development to avoid API costs. What is the risk of shipping this to production accidentally? How would you guard against it?
+
+Task 3 · Retrieval Config
+Implement a retrieval function that accepts a user query, converts it to an embedding, and returns the top-K most relevant recipe chunks. Then tune the parameters for the test queries below.
+
+def retrieve_recipes(query: str, top_k: int = 5, nprobe: int = 10) -> list[dict]:
+    """
+    1. Embed the query using the same model used at ingestion.
+    2. Search the vector index with the given nprobe.
+    3. Filter by metadata if the query contains dietary keywords.
+    4. Return top_k results with chunk text + metadata.
+    """
+    # YOUR CODE HERE
+    ...
+
+
+Q6  n_probe tuning
+Run your retrieval function with n_probe = 1, 5, 10, 50 on the three test queries below. Record recall@5 (manually judge relevance). At what n_probe value does recall stop improving? What does that tell you?
+
+Test Query
+Expected Category
+n_probe=1
+n_probe=5
+n_probe=10
+n_probe=50
+What can I cook with chicken and lemon?
+protein / citrus
+
+Low-carb dessert under 30 min
+keto / quick
+
+Vegan soup for cold weather
+vegan / comfort
+
+Stretch Goal A  (+10 bonus)
+Add metadata pre-filtering before the vector search: parse dietary keywords from the query ("vegan", "gluten-free", "keto", etc.) and filter chunks by their tags field before computing similarity. Measure how filtering affects latency and recall compared to unfiltered search.
+

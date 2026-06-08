@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+
+# FAISS index artifacts (large binary files — rebuild with build_index.py)
+index/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# pytest
+.pytest_cache/
+
+# Data corpus (large; manage separately)
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env vars
+.env

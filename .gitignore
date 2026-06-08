@@ -16,8 +16,6 @@ build/
 # pytest
 .pytest_cache/
 
-# Data corpus (large; manage separately)
-data/
 
 # OS
 .DS_Store
